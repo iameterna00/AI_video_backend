@@ -15,7 +15,7 @@ def safe_predict(step_name, **kwargs):
     except Exception as e:
         print(f"[FAIL] {step_name} -> {e}")
         return None
-
+# 
 def copy_image_from_gradio_temp(gradio_temp_path: str) -> str:
     """
     Copy the generated image from Gradio's temp directory to our temp folder
