@@ -56,27 +56,18 @@ def generate_video_from_image_local_ltx(image_path, prompt, duration=4, contentT
         print(colored(f"🎬 Starting local LTX video generation for: {os.path.basename(image_path)}", "blue"))
         print(colored(f"📝 Prompt: {prompt}", "cyan"))
         
-        # Apply content type modifications to prompt if needed
         if contentType == "cartoon":
             newprompt = (
-                f"{prompt} night dark, old cartoon style, with heavy shadows, "
-                f"dramatic lighting, night-time setting, detailed linework, and an eerie, surreal atmosphere. "
-                f"Inspired by adult animated shows and noir comics. Subtle neon glow, slightly distorted "
-                f"facial expressions, thick outlines, VHS effect, muted colors, and vintage textures. "
-                f"Stylized background with twilight skies, mysterious environments, and emotional tension. "
-                f"4K, highly detailed, digital painting."
+                f"Give it cinematic camera moments, smooth dolly zoom, shallow depth of field, natural parallax motion."
+
             )
         elif contentType == "silhouette":
             newprompt = (
-                f"{prompt}. The scene is rendered in a dark, atmospheric style with a sharp silhouette of the character "
-                f"standing out against a shadowy, abstract background. An eerie, glowing aura radiates from the figure, "
-                f"casting high-contrast light and subtle highlights. Swirling tendrils of energy or smoke surround the character, "
-                f"giving a sense of power and mystery. Intricate, faintly glowing symbols or patterns are subtly integrated into the composition, "
-                f"adding layers of psychic or supernatural meaning. The overall mood is surreal, intense, and moody, "
-                f"evoking a sense of control, dominance, or hidden power. High detail, digital art, dramatic lighting, cinematic 4K."
+             f"Give it cinematic camera moments, smooth dolly zoom, shallow depth of field, natural parallax motion."
             )
         else:
-            newprompt = prompt
+            newprompt = f"Give it cinematic camera moments, smooth dolly zoom, shallow depth of field, natural parallax motion."
+
 
         # Store the final video path returned by Gradio
         gradio_video_path = None
@@ -358,12 +349,11 @@ def create_video_from_images_with_local_ltx(image_paths, image_prompts_with_timi
 def main():
     # Example images and prompts (same as before)
     image_paths = [
-        "../test/9fbd030a-1864-48c7-a980-4483019fef75.png",
-        "../test/42cf679c-0a76-436d-9a0b-ddfdf39c61d5.png",
-        "../test/73ee5776-1ba7-4049-9d3e-203f3aaffead.png",
-        "../test/0936ea2f-40f7-4f6d-90ad-59609640c994.png",
+        "../test/0b7d16c1-2fb8-450e-94c3-6211336bafd1.jpg",
+        "../test/3a7af9e6-38f3-4e48-bdb3-be15b3b40d20.jpg",
+        "../test/7a5661bd-1026-404e-809b-903bdbe0a5ab.jpg",
+        "../test/ba1bbd06-627c-4c84-96e4-679962c837e3.jpg",
     ]
-
     image_prompts_with_timing = [
         {"Img prompt": "Extreme close-up on a porcelain doll's face, cracked eye oozing black fluid", "start": 0.0, "end": 4.0},
         {"Img prompt": "The porcelain doll is held by a trembling young girl in a dark attic", "start": 4.0, "end": 8.0},

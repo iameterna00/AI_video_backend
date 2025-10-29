@@ -121,6 +121,7 @@ def shutdown_server():
 
 def tts_hf(
     script: str,
+    language: str = "en",
     output_file: Optional[str] = None,
     audio_prompt: Optional[str] = None
 ) -> str:
@@ -168,7 +169,7 @@ def tts_hf(
                 exaggeration_input=0.5,
                 temperature_input=0.8,
                 seed_num_input=0,
-                language_id="en",
+                language_id=language,
                 cfgw_input=0.5,
                 api_name="/generate_tts_audio"
             )

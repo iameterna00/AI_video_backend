@@ -8,7 +8,7 @@ from typing import List
 from termcolor import colored
 from playsound import playsound
 from pathlib import Path
-
+ 
 VOICES = [
     "en_us_ghostface", "en_us_chewbacca", "en_us_c3po", "en_us_stitch", "en_us_stormtrooper", "en_us_rocket",
     "en_au_001", "en_au_002", "en_uk_001", "en_uk_003", "en_us_001", "en_us_002", "en_us_006", "en_us_007",

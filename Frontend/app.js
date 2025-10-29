@@ -21,7 +21,7 @@ advancedOptionsToggle.addEventListener("click", () => {
   advancedOptions.classList.toggle("hidden");
 });
 
-
+// 
 const cancelGeneration = () => {
   console.log("Canceling generation...");
   // Send request to /cancel

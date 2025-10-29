@@ -46,7 +46,7 @@ def cleanup_images(image_paths: List[str]):
             pass
 
 
-def __generate_subtitles_whisper(audio_path: str, model_size: str = "base") -> str:
+def __generate_subtitles_whisper(audio_path: str, model_size: str = "medium") -> str:
     """
     Generates subtitles from a given audio file using local Whisper.
     """
@@ -70,7 +70,7 @@ def __generate_subtitles_whisper(audio_path: str, model_size: str = "base") -> s
     return "\n".join(subtitles)
 
 
-def generate_subtitles(audio_path: str, model_size: str = "base") -> str:
+def generate_subtitles(audio_path: str, model_size: str = "medium") -> str:
     """
     Generates subtitles from an audio file using Whisper locally, with debug prints.
     """

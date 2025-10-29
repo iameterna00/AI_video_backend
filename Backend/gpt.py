@@ -52,7 +52,7 @@ def generate_script(video_subject: str, paragraph_number: str, ai_model: str,  c
         prompt = customPrompt
     else:
         prompt = f"""
-        Write a single engaging narration about: {video_subject}.
+        Write a single engaging narration about: {video_subject} in 300 character.
 
         **STYLE GUIDELINES:**
         - Sound like a documentary narrator: clear, factual, but gripping.
@@ -284,7 +284,7 @@ def get_image_search_terms(video_subject: str, amount: int, subtitles_path: str,
     ]
 
     prompt = f"""
-    Based on the following video script about {video_subject}, generate EXACTLY {amount} highly detailed image prompts 
+    Based on the following video script about {video_subject}, generate EXACTLY {amount} highly detailed image prompts a part of exactly 3 seconds each looking at the video script,
     for AI image generation. The video has a total duration of {total_duration:.2f} seconds.
 
     VIDEO SCRIPT: "{full_script}"

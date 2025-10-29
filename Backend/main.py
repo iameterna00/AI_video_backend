@@ -1,3 +1,4 @@
+import math
 import os
 import json
 import re
@@ -37,7 +38,6 @@ CORS(
 HOST = "0.0.0.0"
 PORT = 8000
 
-AMOUNT_OF_STOCK_VIDEOS = 8
 GENERATING = False
 
 GENERATED_VIDEOS_DIR = os.path.abspath("../Generated_Video")
@@ -48,7 +48,6 @@ os.makedirs(SONGS_DIR, exist_ok=True)
 
 VOICE_DIR = os.path.abspath("../voice")
 os.makedirs(VOICE_DIR, exist_ok=True)
-
 
 # ============================
 # Helper: Safe JSON parsing
@@ -67,12 +66,21 @@ def safe_parse_json(response: str):
 
 active_tasks = {}
 
-def update_task_progress(task_id, status, progress=None, current_video=None, total_videos=None, message=None):
-    """Update task progress in the shared dictionary"""
+def update_task_progress(task_id, status, progress=None, current_video=None, total_videos=None, message=None, data=None, current_step=None, step_progress=None):
     if task_id not in active_tasks:
-        active_tasks[task_id] = {}
+        active_tasks[task_id] = {
+            "status": status,
+            "progress": 0,
+            "current_video": 0,
+            "total_videos": 0,
+            "message": "",
+            "current_step": "",
+            "step_progress": 0,
+            "data": None
+        }
     
-    active_tasks[task_id]["status"] = status
+    if status:
+        active_tasks[task_id]["status"] = status
     if progress is not None:
         active_tasks[task_id]["progress"] = progress
     if current_video is not None:
@@ -81,6 +89,12 @@ def update_task_progress(task_id, status, progress=None, current_video=None, tot
         active_tasks[task_id]["total_videos"] = total_videos
     if message is not None:
         active_tasks[task_id]["message"] = message
+    if current_step is not None:
+        active_tasks[task_id]["current_step"] = current_step
+    if step_progress is not None:
+        active_tasks[task_id]["step_progress"] = step_progress
+    if data is not None:
+        active_tasks[task_id]["data"] = data
 
 # ===========================================
 # Video generation endpoint - IMMEDIATE RESPONSE
@@ -91,7 +105,14 @@ def generate():
     task_id = str(uuid4())
     
     # Initialize task
-    update_task_progress(task_id, "processing", progress=0, current_video=0, message="Starting video generation...")
+    update_task_progress(
+        task_id, 
+        "processing", 
+        progress=0, 
+        current_video=0, 
+        message="Starting video generation...",
+        current_step="Initializing"
+    )
     
     # Start processing in background thread
     thread = threading.Thread(target=background_generation, args=(task_id, data))
@@ -125,6 +146,7 @@ def background_generation(task_id, data):
         
         paragraph_number = int(data.get('paragraphNumber', 1))
         ai_model = data.get('aiModel')
+        language = data.get('language')
         subtitles_position = data.get('subtitlesPosition')
         text_color = data.get('color')
         use_music = data.get('useMusic', False)
@@ -163,7 +185,8 @@ def background_generation(task_id, data):
                 progress=progress,
                 current_video=video_index + 1,
                 total_videos=amountofshorts,
-                message=f"Generating video {video_index + 1} of {amountofshorts}"
+                message=f"Generating video {video_index + 1} of {amountofshorts}",
+                current_step="Starting video generation"
             )
             
             # Clean temp directories for each video
@@ -173,7 +196,12 @@ def background_generation(task_id, data):
             # ============================
             # Generate script
             # ============================
-            update_task_progress(task_id, "processing", message="Generating script...")
+            update_task_progress(
+                task_id, 
+                "processing", 
+                current_step="Generating script",
+                step_progress=20
+            )
             
             if use_custom_prompts:
                 script = custom_prompts[video_index]  # use specific custom prompt
@@ -190,18 +218,28 @@ def background_generation(task_id, data):
             # ============================
             # Generate TTS Audio
             # ============================
-            update_task_progress(task_id, "processing", message="Generating audio...")
+            update_task_progress(
+                task_id, 
+                "processing", 
+                current_step="Generating audio",
+                step_progress=40
+            )
             
             # Save the full script as one TTS clip
             tts_path = f"../temp/{uuid4()}.mp3"
             voice_path = f"../voice/{voice}" if voice else "../voice/Michel.mp3"
-            tts_hf(script, output_file=tts_path, audio_prompt=voice_path)
+            tts_hf(script, output_file=tts_path, audio_prompt=voice_path, language=language)
             final_audio = AudioFileClip(tts_path)
 
             # ===================================
             # Generate subtitles With Time Stamp
             # ==================================
-            update_task_progress(task_id, "processing", message="Generating subtitles...")
+            update_task_progress(
+                task_id, 
+                "processing", 
+                current_step="Generating subtitles",
+                step_progress=60
+            )
             
             try:
                 subtitles_path = generate_subtitles(
@@ -214,12 +252,18 @@ def background_generation(task_id, data):
             # ============================
             # Fetch media based on contentType
             # ============================
-            update_task_progress(task_id, "processing", message="Fetching media content...")
+            update_task_progress(
+                task_id, 
+                "processing", 
+                current_step="Fetching media content",
+                step_progress=70
+            )
             
             media_paths = []
             image_prompts = []
             
             if contentType == "stock":
+                AMOUNT_OF_STOCK_VIDEOS = max(1, math.ceil(final_audio.duration / 3))
                 search_terms = get_search_terms(video_subject, AMOUNT_OF_STOCK_VIDEOS, script, ai_model)
                 video_urls = []
                 for term in search_terms:
@@ -234,6 +278,7 @@ def background_generation(task_id, data):
                 media_paths = [save_video(url) for url in video_urls]
             else:
                 # Generative content flow
+                AMOUNT_OF_STOCK_VIDEOS = max(1, math.ceil(final_audio.duration / 3))
                 image_prompts = get_image_search_terms(video_subject, AMOUNT_OF_STOCK_VIDEOS, subtitles_path, ai_model)
                 for term_data in image_prompts:
                     prompt = term_data["Img prompt"] if isinstance(term_data, dict) else term_data
@@ -256,7 +301,12 @@ def background_generation(task_id, data):
             # ============================
             # Create video
             # ============================
-            update_task_progress(task_id, "processing", message="Creating video...")
+            update_task_progress(
+                task_id, 
+                "processing", 
+                current_step="Creating video",
+                step_progress=80
+            )
             
             n_threads = 1
             
@@ -281,7 +331,12 @@ def background_generation(task_id, data):
             bg_music_volume = 0.3
             
             # Generate the final video
-            update_task_progress(task_id, "processing", message="Finalizing video...")
+            update_task_progress(
+                task_id, 
+                "processing", 
+                current_step="Finalizing video",
+                step_progress=90
+            )
             
             generate_video(
                 combined_video_path, tts_path, subtitles_path,
@@ -298,7 +353,12 @@ def background_generation(task_id, data):
             # ============================
             # Generate metadata
             # ============================
-            update_task_progress(task_id, "processing", message="Generating metadata...")
+            update_task_progress(
+                task_id, 
+                "processing", 
+                current_step="Generating metadata",
+                step_progress=95
+            )
             
             title, description, keywords = generate_metadata(video_subject, script, ai_model)
 
@@ -306,7 +366,12 @@ def background_generation(task_id, data):
             # Optional YouTube upload
             # ============================
             if automate_youtube_upload:
-                update_task_progress(task_id, "processing", message="Uploading to YouTube...")
+                update_task_progress(
+                    task_id, 
+                    "processing", 
+                    current_step="Uploading to YouTube",
+                    step_progress=98
+                )
                 
                 client_secrets_file = os.path.abspath("./client_secret.json")
                 if os.path.exists(client_secrets_file):
@@ -335,10 +400,12 @@ def background_generation(task_id, data):
             video_filenames = [os.path.basename(path) for path in generated_video_paths]
             update_task_progress(
                 task_id, 
-                "success", 
+                "completed", 
                 progress=100,
+                current_step="Completed",
+                step_progress=100,
                 message=f"{len(generated_video_paths)} videos generated!",
-                data=video_filenames
+                data={"videos": video_filenames}
             )
         else:
             # Generation completed but no videos were created
@@ -349,6 +416,7 @@ def background_generation(task_id, data):
         print(colored(f"[-] Error: {err}", "red"))
         GENERATING = False
         update_task_progress(task_id, "error", message=str(err))
+
 # ===========================================
 # Check generation status
 # ===========================================
@@ -356,7 +424,7 @@ def background_generation(task_id, data):
 def check_status(task_id):
     task = active_tasks.get(task_id)
     if not task:
-        return jsonify({"status": "not_found", "message": "Task not found"})
+        return jsonify({"status": "not_found", "message": "Task not found"}), 404
     
     return jsonify(task)
 
