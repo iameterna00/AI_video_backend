@@ -56,7 +56,14 @@ def generate_flux_image(prompt: str, contentType: str):
             f"{prompt}. The scene is rendered in a dark, atmospheric style with a sharp silhouette of the character "
             f"standing out against a shadowy, abstract background. An eerie, glowing aura radiates from the figure, "
             f"casting high-contrast light and subtle highlights. Swirling tendrils of energy or smoke surround the character, "
-            f"giving a sense of power and mystery. Intricate, faintly glowing symbols or patterns are subtly integrated into the composition, "
+            f"adding layers of psychic or supernatural meaning. The overall mood is surreal, intense, and moody, "
+            f"evoking a sense of control, dominance, or hidden power. High detail, digital art, dramatic lighting, cinematic 4K, vertical composition (9:16)."
+        )
+    elif contentType == "silhouette_3d":
+        newprompt = (
+            f"{prompt}. The scene is rendered in a dark, 3D cartoonish, atmospheric style with a sharp silhouette of the character "
+            f"standing out against a shadowy, abstract background. An eerie, glowing aura radiates from the figure, "
+            f"casting high-contrast light and subtle highlights. Swirling tendrils of energy, "
             f"adding layers of psychic or supernatural meaning. The overall mood is surreal, intense, and moody, "
             f"evoking a sense of control, dominance, or hidden power. High detail, digital art, dramatic lighting, cinematic 4K, vertical composition (9:16)."
         )
@@ -112,7 +119,7 @@ def generate_flux_image(prompt: str, contentType: str):
         image_mode=1,
         prompt=newprompt,
         negative_prompt="",
-        resolution="480x832",
+        resolution="720x1280",
         video_length=81,
         batch_size=1,
         seed=-1,

@@ -58,21 +58,19 @@ def generate_video_from_image_local_ltx(image_path, prompt, duration=4, contentT
         
         if contentType == "cartoon":
             newprompt = (
-                f"Give it cinematic camera moments, smooth dolly zoom, shallow depth of field, natural parallax motion."
+                f"{prompt} Give it cinematic camera moments, smooth dolly zoom, natural parallax motion."
 
             )
         elif contentType == "silhouette":
             newprompt = (
-             f"Give it cinematic camera moments, smooth dolly zoom, shallow depth of field, natural parallax motion."
+             f"{prompt} Give it cinematic camera moments, smooth dolly zoom, natural parallax motion."
             )
         else:
-            newprompt = f"Give it cinematic camera moments, smooth dolly zoom, shallow depth of field, natural parallax motion."
+            newprompt = f"{prompt} Give it cinematic camera moments, smooth dolly zoom, natural parallax motion."
 
 
         # Store the final video path returned by Gradio
         gradio_video_path = None
-
-        # --- Step 1: Change model family ---
 
         safe_predict("Change model family", current_model_family="ltxv", api_name="/change_model_family")
         safe_predict(
@@ -122,7 +120,7 @@ def generate_video_from_image_local_ltx(image_path, prompt, duration=4, contentT
             image_mode=0,
             prompt=newprompt,
             negative_prompt="",
-            resolution="480x832",
+            resolution="720x1280",
             video_length=video_length,
             batch_size=1,
             seed=-1,

@@ -12,7 +12,7 @@ from termcolor import colored
 from moviepy.config import change_settings
 from moviepy.editor import AudioFileClip
 from dotenv import load_dotenv
-from gemini import generate_flux_image
+from image import generate_flux_image
 from utils import clean_dir, check_env_vars
 from gpt import generate_script, generate_metadata, get_image_search_terms, get_search_terms
 from video import combine_videos, generate_subtitles, generate_video, save_video
@@ -149,7 +149,7 @@ def background_generation(task_id, data):
         language = data.get('language')
         subtitles_position = data.get('subtitlesPosition')
         text_color = data.get('color')
-        use_music = data.get('useMusic', False)
+        use_music = data.get('useMusic', False) #Future use
         automate_youtube_upload = data.get('automateYoutubeUpload', False)
         contentType = data.get('contentType', "stock")
         songsName = data.get('songsName')
@@ -189,7 +189,7 @@ def background_generation(task_id, data):
                 current_step="Starting video generation"
             )
             
-            # Clean temp directories for each video
+            # Clean temp for each video
             clean_dir("../temp/")
             clean_dir("../subtitles/")
 
@@ -363,7 +363,7 @@ def background_generation(task_id, data):
             title, description, keywords = generate_metadata(video_subject, script, ai_model)
 
             # ============================
-            # Optional YouTube upload
+            # Optional YouTube upload ----- FUTURE USE
             # ============================
             if automate_youtube_upload:
                 update_task_progress(
